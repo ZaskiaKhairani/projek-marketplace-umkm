@@ -1,0 +1,188 @@
+/* style.css - Tema Hijau Profesional NusaKita */
+:root {
+    --primary-green: #198754;
+    --dark-green: #14532d;
+    --light-green: #f4fdf6;
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.announcement-bar {
+    background-color: var(--dark-green);
+    font-size: 0.85rem;
+}
+
+/* Pengaturan Logo Navbar (diperbesar agar proporsional) */
+.navbar-brand img {
+    height: 55px; 
+    width: auto;
+    object-fit: contain;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #f4fdf6 0%, #e8f5e9 100%);
+    border: 1px solid #c8e6c9;
+}
+
+.product-card {
+    border: none;
+    transition: all 0.3s ease;
+    background: #ffffff;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 1rem 2rem rgba(25, 135, 84, 0.15)!important;
+}
+
+.product-img-wrapper {
+    height: 210px;
+    overflow: hidden;
+    background-color: #f1f3f5;
+    position: relative;
+}
+
+.product-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-img-wrapper img {
+    transform: scale(1.05);
+}
+
+.btn-success-custom {
+    background-color: var(--primary-green);
+    color: white;
+}
+
+.btn-success-custom:hover {
+    background-color: var(--dark-green);
+    color: white;
+}
+
+.badge-green {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: var(--primary-green);
+}
+
+.category-circle {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid #e9ecef;
+}
+
+.category-item:hover .category-circle {
+    transform: scale(1.08);
+    border-color: var(--primary-green);
+    box-shadow: 0 0.5rem 1rem rgba(25, 135, 84, 0.15);
+}
+
+.category-item {
+    text-decoration: none !important;
+}
+
+/* style.css - Tema Hijau Profesional NusaKita */
+:root {
+    --primary-green: #198754;
+    --dark-green: #14532d;
+    --light-green: #f4fdf6;
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.announcement-bar {
+    background-color: var(--dark-green);
+    font-size: 0.85rem;
+}
+
+.navbar-brand img {
+    height: 75px; 
+    width: auto;
+    object-fit: contain;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #f4fdf6 0%, #e8f5e9 100%);
+    border: 1px solid #c8e6c9;
+}
+
+.product-card {
+    border: none;
+    transition: all 0.3s ease;
+    background: #ffffff;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 1rem 2rem rgba(25, 135, 84, 0.15)!important;
+}
+
+.product-img-wrapper {
+    height: 210px;
+    overflow: hidden;
+    background-color: #f1f3f5;
+    position: relative;
+}
+
+.product-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-img-wrapper img {
+    transform: scale(1.05);
+}
+
+.btn-success-custom {
+    background-color: var(--primary-green);
+    color: white;
+}
+
+.btn-success-custom:hover {
+    background-color: var(--dark-green);
+    color: white;
+}
+
+.badge-green {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: var(--primary-green);
+}
+
+.category-circle {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid #e9ecef;
+}
+
+.category-item:hover .category-circle {
+    transform: scale(1.08);
+    border-color: var(--primary-green);
+    box-shadow: 0 0.5rem 1rem rgba(25, 135, 84, 0.15);
+}
+
+.category-item {
+    text-decoration: none !important;
+}
+
+/* Styling Khusus Tabel Keranjang & Pesanan */
+.cart-table th {
+    background-color: var(--light-green) !important;
+    color: var(--dark-green) !important;
+    font-weight: 600;
+    border-bottom: 2px solid #c8e6c9;
+}
