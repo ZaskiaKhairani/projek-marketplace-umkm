@@ -81,7 +81,7 @@ if (isset($_POST['proses_beli'])) {
     <nav class="navbar navbar-light bg-white shadow-sm py-3">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="index.php">
-                <img src="assets/img/logo.jpeg" alt="NusaKita" style="height: 50px; object-fit: contain;">
+                <img src="assets/img/logo.jpg" alt="NusaKita" style="height: 50px; object-fit: contain;">
             </a>
             <a href="index.php" class="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold">
                 <i class="bi bi-arrow-left me-1"></i> Kembali Belanja
