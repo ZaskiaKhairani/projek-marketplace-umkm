@@ -1,6 +1,38 @@
 <?php
 session_start();
 include 'koneksi.php';
+
+// Cek login user
+if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
+    header("Location: login.php");
+    exit;
+}
+
+// Ambil ID pembeli dari berbagai kemungkinan key session
+$id_pembeli = $_SESSION['user']['id_user'] 
+    ?? $_SESSION['user']['id'] 
+    ?? $_SESSION['id_user'] 
+    ?? $_SESSION['id'] 
+    ?? 0;
+
+// Ambil data keranjang dari database digabung dengan tabel produk
+$query_keranjang = mysqli_query($koneksi, "
+    SELECT keranjang.id_keranjang, keranjang.jumlah, produk.id_produk, produk.nama_produk, produk.kategori, produk.harga, produk.stok, produk.gambar, produk.foto
+    FROM keranjang
+    JOIN produk ON keranjang.id_produk = produk.id_produk
+    WHERE keranjang.id_pembeli = '$id_pembeli'
+    ORDER BY keranjang.id_keranjang DESC
+");
+
+$items = [];
+$total_bayar = 0;
+if ($query_keranjang) {
+    while ($row = mysqli_fetch_assoc($query_keranjang)) {
+        $row['subtotal'] = $row['harga'] * $row['jumlah'];
+        $total_bayar += $row['subtotal'];
+        $items[] = $row;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -11,10 +43,12 @@ include 'koneksi.php';
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- CSS Eksternal Terpisah -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100 bg-light">
 
     <!-- Top Announcement Bar -->
     <div class="announcement-bar text-white py-2 text-center">
@@ -57,16 +91,21 @@ include 'koneksi.php';
 
     <!-- Main Content: Keranjang Belanja -->
     <div class="container my-5 flex-grow-1">
-        <h3 class="fw-bold text-dark mb-4"><i class="bi bi-cart3 text-success me-2"></i> Keranjang Belanja Anda</h3>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold text-dark mb-0"><i class="bi bi-cart3 text-success me-2"></i> Keranjang Belanja Anda</h3>
+            <a href="index.php" class="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold">
+                <i class="bi bi-plus-lg me-1"></i> Tambah Produk Lain
+            </a>
+        </div>
 
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table cart-table mb-0 align-middle">
-                        <thead>
+                        <thead class="table-success">
                             <tr>
                                 <th class="py-3 px-4">No</th>
-                                <th class="py-3">Nama Produk</th>
+                                <th class="py-3">Produk</th>
                                 <th class="py-3">Harga Satuan</th>
                                 <th class="py-3 text-center">Jumlah</th>
                                 <th class="py-3">Subtotal</th>
@@ -74,7 +113,7 @@ include 'koneksi.php';
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (empty($_SESSION['keranjang'])): ?>
+                            <?php if (empty($items)): ?>
                                 <tr>
                                     <td colspan="6" class="text-center py-5 text-muted">
                                         <i class="bi bi-cart-x display-4 text-secondary mb-3 d-block"></i>
@@ -82,11 +121,52 @@ include 'koneksi.php';
                                     </td>
                                 </tr>
                             <?php else: ?>
-                                <!-- Looping item keranjang jika ada -->
+                                <?php $no = 1; foreach ($items as $item): ?>
+                                    <?php
+                                        $file_foto = !empty($item['gambar']) ? $item['gambar'] : ($item['foto'] ?? '');
+                                        $path_foto = (!empty($file_foto) && file_exists("uploads/" . $file_foto)) ? "uploads/" . $file_foto : "assets/img/logo.jpg";
+                                    ?>
+                                    <tr>
+                                        <td class="px-4 fw-semibold"><?= $no++; ?></td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="<?= htmlspecialchars($path_foto); ?>" alt="<?= htmlspecialchars($item['nama_produk']); ?>" class="rounded-3 border bg-light" style="width: 60px; height: 60px; object-fit: cover;">
+                                                <div>
+                                                    <div class="fw-bold text-dark text-capitalize"><?= htmlspecialchars($item['nama_produk']); ?></div>
+                                                    <span class="badge bg-success-subtle text-success rounded-pill small"><?= htmlspecialchars($item['kategori']); ?></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="fw-semibold text-secondary">Rp<?= number_format($item['harga'], 0, ',', '.'); ?></td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark border px-3 py-2 fs-6"><?= (int)$item['jumlah']; ?></span>
+                                        </td>
+                                        <td class="fw-bold text-success">Rp<?= number_format($item['subtotal'], 0, ',', '.'); ?></td>
+                                        <td class="text-center">
+                                            <button type="button" onclick="hapusItem(<?= (int)$item['id_keranjang']; ?>)" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
+
+                <?php if (!empty($items)): ?>
+                    <div class="p-4 bg-light border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                        <div>
+                            <span class="text-muted small d-block">Total Pembayaran (<?= count($items); ?> jenis produk)</span>
+                            <span class="fw-bold text-success fs-3">Rp<?= number_format($total_bayar, 0, ',', '.'); ?></span>
+                        </div>
+                        <form action="checkout_keranjang.php" method="POST" class="m-0">
+                            <button type="submit" name="checkout" class="btn btn-success-custom fw-bold px-5 py-2 rounded-pill shadow-sm">
+                                <i class="bi bi-bag-check-fill me-1"></i> Checkout Sekarang
+                            </button>
+                        </form>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -132,7 +212,26 @@ include 'koneksi.php';
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JS Bundle -->
+    <!-- Bootstrap 5 & SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function hapusItem(idKeranjang) {
+            Swal.fire({
+                title: 'Hapus dari Keranjang?',
+                text: 'Produk ini akan dikeluarkan dari keranjang belanja kamu.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'hapus_keranjang.php?id=' + idKeranjang;
+                }
+            });
+        }
+    </script>
 </body>
 </html>
