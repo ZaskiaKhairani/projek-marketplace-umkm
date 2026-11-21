@@ -25,11 +25,9 @@ $query_keranjang = mysqli_query($koneksi, "
 ");
 
 $items = [];
-$total_bayar = 0;
 if ($query_keranjang) {
     while ($row = mysqli_fetch_assoc($query_keranjang)) {
         $row['subtotal'] = $row['harga'] * $row['jumlah'];
-        $total_bayar += $row['subtotal'];
         $items[] = $row;
     }
 }
@@ -47,6 +45,12 @@ if ($query_keranjang) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- CSS Eksternal Terpisah -->
     <link rel="stylesheet" href="style.css">
+    <style>
+        .form-check-input:checked {
+            background-color: #198754;
+            border-color: #198754;
+        }
+    </style>
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
 
@@ -98,77 +102,103 @@ if ($query_keranjang) {
             </a>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table cart-table mb-0 align-middle">
-                        <thead class="table-success">
-                            <tr>
-                                <th class="py-3 px-4">No</th>
-                                <th class="py-3">Produk</th>
-                                <th class="py-3">Harga Satuan</th>
-                                <th class="py-3 text-center">Jumlah</th>
-                                <th class="py-3">Subtotal</th>
-                                <th class="py-3 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($items)): ?>
+        <form action="checkout_keranjang.php" method="POST" id="formCheckoutKeranjang">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table cart-table mb-0 align-middle">
+                            <thead class="table-success">
                                 <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        <i class="bi bi-cart-x display-4 text-secondary mb-3 d-block"></i>
-                                        Keranjang belanja kamu masih kosong. Yuk pilih produk di katalog!
-                                    </td>
+                                    <th class="py-3 ps-4" style="width: 50px;">
+                                        <?php if (!empty($items)): ?>
+                                            <input type="checkbox" class="form-check-input border-secondary shadow-none" id="checkAllTop" style="width: 1.2rem; height: 1.2rem; cursor: pointer;" title="Pilih Semua">
+                                        <?php endif; ?>
+                                    </th>
+                                    <th class="py-3">No</th>
+                                    <th class="py-3">Produk</th>
+                                    <th class="py-3">Harga Satuan</th>
+                                    <th class="py-3 text-center">Jumlah</th>
+                                    <th class="py-3">Subtotal</th>
+                                    <th class="py-3 text-center">Aksi</th>
                                 </tr>
-                            <?php else: ?>
-                                <?php $no = 1; foreach ($items as $item): ?>
-                                    <?php
-                                        $file_foto = !empty($item['gambar']) ? $item['gambar'] : ($item['foto'] ?? '');
-                                        $path_foto = (!empty($file_foto) && file_exists("uploads/" . $file_foto)) ? "uploads/" . $file_foto : "assets/img/logo.jpg";
-                                    ?>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($items)): ?>
                                     <tr>
-                                        <td class="px-4 fw-semibold"><?= $no++; ?></td>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <img src="<?= htmlspecialchars($path_foto); ?>" alt="<?= htmlspecialchars($item['nama_produk']); ?>" class="rounded-3 border bg-light" style="width: 60px; height: 60px; object-fit: cover;">
-                                                <div>
-                                                    <div class="fw-bold text-dark text-capitalize"><?= htmlspecialchars($item['nama_produk']); ?></div>
-                                                    <span class="badge bg-success-subtle text-success rounded-pill small"><?= htmlspecialchars($item['kategori']); ?></span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="fw-semibold text-secondary">Rp<?= number_format($item['harga'], 0, ',', '.'); ?></td>
-                                        <td class="text-center">
-                                            <span class="badge bg-light text-dark border px-3 py-2 fs-6"><?= (int)$item['jumlah']; ?></span>
-                                        </td>
-                                        <td class="fw-bold text-success">Rp<?= number_format($item['subtotal'], 0, ',', '.'); ?></td>
-                                        <td class="text-center">
-                                            <button type="button" onclick="hapusItem(<?= (int)$item['id_keranjang']; ?>)" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                                                <i class="bi bi-trash"></i> Hapus
-                                            </button>
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            <i class="bi bi-cart-x display-4 text-secondary mb-3 d-block"></i>
+                                            Keranjang belanja kamu masih kosong. Yuk pilih produk di katalog!
                                         </td>
                                     </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-
-                <?php if (!empty($items)): ?>
-                    <div class="p-4 bg-light border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                        <div>
-                            <span class="text-muted small d-block">Total Pembayaran (<?= count($items); ?> jenis produk)</span>
-                            <span class="fw-bold text-success fs-3">Rp<?= number_format($total_bayar, 0, ',', '.'); ?></span>
-                        </div>
-                        <form action="checkout_keranjang.php" method="POST" class="m-0">
-                            <button type="submit" name="checkout" class="btn btn-success-custom fw-bold px-5 py-2 rounded-pill shadow-sm">
-                                <i class="bi bi-bag-check-fill me-1"></i> Checkout Sekarang
-                            </button>
-                        </form>
+                                <?php else: ?>
+                                    <?php $no = 1; foreach ($items as $item): ?>
+                                        <?php
+                                            $file_foto = !empty($item['gambar']) ? $item['gambar'] : ($item['foto'] ?? '');
+                                            $ada_foto  = (!empty($file_foto) && file_exists("uploads/" . $file_foto));
+                                        ?>
+                                        <tr>
+                                            <td class="ps-4">
+                                                <input type="checkbox" 
+                                                       class="form-check-input item-checkbox border-secondary shadow-none" 
+                                                       name="pilih_keranjang[]" 
+                                                       value="<?= (int)$item['id_keranjang']; ?>" 
+                                                       data-subtotal="<?= (int)$item['subtotal']; ?>"
+                                                       style="width: 1.2rem; height: 1.2rem; cursor: pointer;">
+                                            </td>
+                                            <td class="fw-semibold"><?= $no++; ?></td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <?php if ($ada_foto): ?>
+                                                        <img src="<?= htmlspecialchars("uploads/" . $file_foto); ?>" alt="<?= htmlspecialchars($item['nama_produk']); ?>" class="rounded-3 border bg-light flex-shrink-0" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    <?php else: ?>
+                                                        <!-- Kotak kosong polos jika belum ada foto produk -->
+                                                        <div class="rounded-3 border bg-light flex-shrink-0" style="width: 60px; height: 60px;"></div>
+                                                    <?php endif; ?>
+                                                    <div>
+                                                        <div class="fw-bold text-dark text-capitalize"><?= htmlspecialchars($item['nama_produk']); ?></div>
+                                                        <span class="badge bg-success-subtle text-success rounded-pill small"><?= htmlspecialchars($item['kategori']); ?></span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="fw-semibold text-secondary">Rp<?= number_format($item['harga'], 0, ',', '.'); ?></td>
+                                            <td class="text-center">
+                                                <span class="badge bg-light text-dark border px-3 py-2 fs-6"><?= (int)$item['jumlah']; ?></span>
+                                            </td>
+                                            <td class="fw-bold text-success">Rp<?= number_format($item['subtotal'], 0, ',', '.'); ?></td>
+                                            <td class="text-center">
+                                                <button type="button" onclick="hapusItem(<?= (int)$item['id_keranjang']; ?>)" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                                    <i class="bi bi-trash"></i> Hapus
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
-                <?php endif; ?>
+
+                    <?php if (!empty($items)): ?>
+                        <div class="p-4 bg-light border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="form-check d-flex align-items-center gap-2 mb-0">
+                                    <input class="form-check-input border-secondary shadow-none mt-0" type="checkbox" id="checkAllBottom" style="width: 1.2rem; height: 1.2rem; cursor: pointer;">
+                                    <label class="form-check-label fw-semibold text-dark" for="checkAllBottom" style="cursor: pointer;">
+                                        Pilih Semua (<?= count($items); ?>)
+                                    </label>
+                                </div>
+                                <div class="border-start ps-4">
+                                    <span class="text-muted small d-block">Total Pembayaran (<span id="jumlahJenis">0</span> produk dipilih)</span>
+                                    <span class="fw-bold text-success fs-3" id="totalBayar">Rp0</span>
+                                </div>
+                            </div>
+                            <button type="submit" name="checkout" class="btn btn-success-custom fw-bold px-5 py-2 rounded-pill shadow-sm">
+                                <i class="bi bi-bag-check-fill me-1"></i> Checkout (<span id="jumlahTombol">0</span>)
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 
     <!-- Footer Profesional -->
@@ -216,6 +246,65 @@ if ($query_keranjang) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        const checkAllTop = document.getElementById('checkAllTop');
+        const checkAllBottom = document.getElementById('checkAllBottom');
+        const totalBayarEl = document.getElementById('totalBayar');
+        const jumlahJenisEl = document.getElementById('jumlahJenis');
+        const jumlahTombolEl = document.getElementById('jumlahTombol');
+        const formCheckout = document.getElementById('formCheckoutKeranjang');
+
+        function hitungTotal() {
+            let total = 0;
+            let terpilih = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    total += parseInt(cb.dataset.subtotal) || 0;
+                    terpilih++;
+                }
+            });
+
+            if (totalBayarEl) totalBayarEl.textContent = 'Rp' + total.toLocaleString('id-ID');
+            if (jumlahJenisEl) jumlahJenisEl.textContent = terpilih;
+            if (jumlahTombolEl) jumlahTombolEl.textContent = terpilih;
+
+            const semuaTercentang = checkboxes.length > 0 && terpilih === checkboxes.length;
+            if (checkAllTop) checkAllTop.checked = semuaTercentang;
+            if (checkAllBottom) checkAllBottom.checked = semuaTercentang;
+        }
+
+        function setSemua(status) {
+            checkboxes.forEach(cb => cb.checked = status);
+            hitungTotal();
+        }
+
+        if (checkAllTop) {
+            checkAllTop.addEventListener('change', (e) => setSemua(e.target.checked));
+        }
+        if (checkAllBottom) {
+            checkAllBottom.addEventListener('change', (e) => setSemua(e.target.checked));
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', hitungTotal);
+        });
+
+        if (formCheckout) {
+            formCheckout.addEventListener('submit', function(e) {
+                const terpilih = document.querySelectorAll('.item-checkbox:checked').length;
+                if (terpilih === 0) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Pilih Produk Dulu',
+                        text: 'Centang minimal satu produk yang ingin kamu checkout.',
+                        icon: 'warning',
+                        confirmButtonColor: '#198754'
+                    });
+                }
+            });
+        }
+
         function hapusItem(idKeranjang) {
             Swal.fire({
                 title: 'Hapus dari Keranjang?',
