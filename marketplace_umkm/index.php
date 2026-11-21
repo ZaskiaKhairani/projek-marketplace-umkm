@@ -240,9 +240,18 @@ function konfirmasiKeluarUser() {
                                 </div>
                             </div>
                             <div class="card-footer bg-white border-0 pt-0 pb-4 px-4">
-                                <a href="beli.php?id=<?= $row['id_produk']; ?>" class="btn btn-success-custom w-100 fw-bold py-2 rounded-3 shadow-sm">
-                                    <i class="bi bi-cart-plus me-1"></i> Beli Sekarang
-                                </a>
+                                <div class="d-flex gap-2">
+                                    <a href="tambah_keranjang.php?id=<?= $row['id_produk']; ?>" 
+                                    class="btn btn-outline-success fw-bold py-2 rounded-3 flex-fill d-flex align-items-center justify-content-center gap-1" 
+                                    style="font-size: 0.85rem;">
+                                        <i class="bi bi-cart-plus"></i> Keranjang
+                                    </a>
+                                    <a href="beli.php?id=<?= $row['id_produk']; ?>" 
+                                    class="btn btn-success-custom fw-bold py-2 rounded-3 shadow-sm flex-fill d-flex align-items-center justify-content-center gap-1" 
+                                    style="font-size: 0.85rem;">
+                                        <i class="bi bi-bag-check"></i> Beli Langsung
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
